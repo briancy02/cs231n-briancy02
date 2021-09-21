@@ -76,9 +76,7 @@ class KNearestNeighbor(object):
                 # not use a loop over dimension, nor use np.linalg.norm().          #
                 #####################################################################
                 # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-                pass
-
+                dists[i][j] = np.sqrt(np.sum(np.square(self.X_train[j] - X[i])))
                 # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         return dists
 
@@ -100,8 +98,9 @@ class KNearestNeighbor(object):
             # Do not use np.linalg.norm().                                        #
             #######################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-            pass
+            temp = np.tile(X[i], (num_train, 1))
+            dists[i, :] = np.sqrt(np.sum(np.square(self.X_train - X[i,:]), axis = 1))
+            
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         return dists
@@ -130,8 +129,13 @@ class KNearestNeighbor(object):
         #       and two broadcast sums.                                         #
         #########################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-        pass
+        X_train_squared_sum = np.sum(np.square(self.X_train), axis=1).reshape(1, num_train)
+        X_squared_sum = np.sum(np.square(X), axis=1).reshape(num_test, 1)
+        XY_sum = np.dot(X, self.X_train.T)
+        print(XY_sum.shape)
+        # dot product of X and X_train transposed results in each cell in the 500x5000 matrix to contain
+        # dot product of the train image pixels and test image pixels which is what we want
+        dists = np.sqrt(X_train_squared_sum - 2*np.dot(X, self.X_train.T) + X_squared_sum)
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         return dists
@@ -163,8 +167,7 @@ class KNearestNeighbor(object):
             # Hint: Look up the function numpy.argsort.                             #
             #########################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-            pass
+            closest_y = (np.argsort(dists[i])[:k]).tolist()
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
             #########################################################################
@@ -175,8 +178,9 @@ class KNearestNeighbor(object):
             # label.                                                                #
             #########################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+            for neighbor in closest_y:
+              y_pred[i] = np.bincount(self.y_train[closest_y]).argmax()
 
-            pass
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
