@@ -132,7 +132,6 @@ class KNearestNeighbor(object):
         X_train_squared_sum = np.sum(np.square(self.X_train), axis=1).reshape(1, num_train)
         X_squared_sum = np.sum(np.square(X), axis=1).reshape(num_test, 1)
         XY_sum = np.dot(X, self.X_train.T)
-        print(XY_sum.shape)
         # dot product of X and X_train transposed results in each cell in the 500x5000 matrix to contain
         # dot product of the train image pixels and test image pixels which is what we want
         dists = np.sqrt(X_train_squared_sum - 2*np.dot(X, self.X_train.T) + X_squared_sum)
@@ -167,7 +166,7 @@ class KNearestNeighbor(object):
             # Hint: Look up the function numpy.argsort.                             #
             #########################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-            closest_y = (np.argsort(dists[i])[:k]).tolist()
+            closest_y = (np.argsort(dists[i])[0:k]).tolist()
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
             #########################################################################
