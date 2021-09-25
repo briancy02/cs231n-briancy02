@@ -51,7 +51,7 @@ def svm_loss_naive(W, X, y, reg):
     loss /= num_train
     dW /= num_train
     dW += reg * 2 * W 
-    # change in rate of change of each element in W is added
+    # rate of change of each element in W**2 is added
 
     # Add regularization to the loss.
     loss += reg * np.sum(W * W)
@@ -89,8 +89,18 @@ def svm_loss_vectorized(W, X, y, reg):
     # result in loss.                                                           #
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+    num_train = X.shape[0]
+    scores = X.dot(W)
+    correct_scores = scores[np.arange(num_train),y].reshape(num_train, 1)  
+    margins = np.maximum(0, scores - correct_scores + 1)
+    print(margins[:,0].shape)
+    margins[np.arange(num_train), y] = 0
+    loss = margins.sum()/num_train
+    loss += reg * np.sum(W * W)
 
-    pass
+    ## setting particular values in 2d array requires advanced indexing which needs 2 array 
+    ## inputs to determine cell location 
+    ## https://numpy.org/doc/stable/reference/arrays.indexing.html#integer-array-indexing
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
