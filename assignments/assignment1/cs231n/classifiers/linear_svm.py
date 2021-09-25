@@ -42,7 +42,7 @@ def svm_loss_naive(W, X, y, reg):
                 continue
             if margin > 0:
                 loss += margin
-                dW[:,j] += X[i]
+                dW[:,j] += X[i] 
 
     #ERRORS: Did not average dW based on instances and just reset the value for each instance
     #ERROR2: Cou8nted classes with score greater than 0 not score - correct_score + 1
@@ -50,9 +50,12 @@ def svm_loss_naive(W, X, y, reg):
     # to be an average instead so we divide by num_train.
     loss /= num_train
     dW /= num_train
+    dW += reg * 2 * W 
+    # change in rate of change of each element in W is added
 
     # Add regularization to the loss.
     loss += reg * np.sum(W * W)
+    
 
     #############################################################################
     # TODO:                                                                     #
