@@ -115,7 +115,6 @@ def svm_loss_vectorized(W, X, y, reg):
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     dW = np.zeros(W.shape)
-    print(dW.shape)
     margins[margins > 0] = 1
     correct_margins = margins.sum(axis=1)
     margins[np.arange(num_train),y] -= correct_margins

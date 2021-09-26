@@ -66,7 +66,11 @@ class LinearClassifier(object):
             #########################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-            pass
+            indexes = np.random.choice(X.shape[0], 200)
+            X_batch = X[indexes]
+            y_batch = y[indexes]
+            loss, grad = svm_loss_vectorized(self.W, X_batch, y_batch, reg)
+            self.W -= learning_rate * grad
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -110,8 +114,9 @@ class LinearClassifier(object):
         # Implement this method. Store the predicted labels in y_pred.            #
         ###########################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+        print(X.dot(self.W).shape)
+        y_pred = np.argmax(X.dot(self.W), axis=1)
 
-        pass
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         return y_pred
