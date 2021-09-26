@@ -90,16 +90,16 @@ def svm_loss_vectorized(W, X, y, reg):
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     num_train = X.shape[0]
+    num_classes = W.shape[1]
     scores = X.dot(W)
     correct_scores = scores[np.arange(num_train),y].reshape(num_train, 1)  
     margins = np.maximum(0, scores - correct_scores + 1)
-    print(margins[:,0].shape)
     margins[np.arange(num_train), y] = 0
     loss = margins.sum()/num_train
     loss += reg * np.sum(W * W)
 
     ## setting particular values in 2d array requires advanced indexing which needs 2 array 
-    ## inputs to determine cell location 
+    ## inputs to determine cell location. : does not work
     ## https://numpy.org/doc/stable/reference/arrays.indexing.html#integer-array-indexing
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -114,8 +114,19 @@ def svm_loss_vectorized(W, X, y, reg):
     # loss.                                                                     #
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+    dW = np.zeros(W.shape)
+    print(dW.shape)
+    margins[margins > 0] = 1
+    correct_margins = margins.sum(axis=1)
+    margins[np.arange(num_train),y] -= correct_margins
+    dW = (X.T).dot(margins) / num_train
 
-    pass
+    # Regularization gradient
+    dW = dW + reg * 2 * W
+
+    ## Had to see solutions. Consider dot products and manipulating original arrays for simple code
+    
+
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
