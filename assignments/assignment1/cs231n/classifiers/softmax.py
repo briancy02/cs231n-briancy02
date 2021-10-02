@@ -100,7 +100,6 @@ def softmax_loss_vectorized(W, X, y, reg):
     # 3. had same problem with stablized scores. always check shapes of values being calculated to avoid miscalculations in wrong axis
   
 
-    pass
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
