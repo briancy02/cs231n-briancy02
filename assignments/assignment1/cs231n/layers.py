@@ -64,11 +64,7 @@ def affine_backward(dout, cache):
 
     # df/db = df/dout * dout/db = df/dout - but these are for all examples, add up gradient of examples
     db = dout.sum(axis=0)
-    print(db)
-    print(db.shape)
     dx = dout.dot(w.T)
-    print(dx.shape)
-    print(x.shape)
     dx = np.reshape(dx, x.shape)
     x = x.reshape((x.shape[0], w.shape[0]))
     dw = x.T.dot(dout)
@@ -157,8 +153,18 @@ def svm_loss(x, y):
     # cs231n/classifiers/linear_svm.py.                                       #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+    correct_scores = x[np.arange(y.shape[0]), y]
+    margins = x - correct_scores.reshape([y.shape[0], 1]) + 1
+    margins[np.arange(y.shape[0]), y] = 0
+    margins[margins<0] = 0
+    loss = margins.sum() / y.shape[0]
 
-    pass
+    margins[margins>0] = 1
+    margins[np.arange(y.shape[0]), y] = -1 * margins.sum(axis=1)
+    
+    dx = margins / y.shape[0]
+
+    # Forgot to divide by num_train and also multiply the margin sum by -1
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -188,8 +194,16 @@ def softmax_loss(x, y):
     # cs231n/classifiers/softmax.py.                                          #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+    correct_scores = x[np.arange(y.shape[0]), y]
+    loss = -1 * correct_scores + np.log(np.exp(x).sum(axis=1))
+    loss = loss.sum() / y.shape[0]
+    #x -= np.max(x, axis=1).reshape((y.shape[0], 1))
+    # You get rid of this because x is initialized as very small floating point numbers
+    dx = np.exp(x) / np.sum(np.exp(x), axis=1).reshape((y.shape[0],1))
+    dx[np.arange(y.shape[0]), y] -= 1
+    dx /= y.shape[0]
 
-    pass
+
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
