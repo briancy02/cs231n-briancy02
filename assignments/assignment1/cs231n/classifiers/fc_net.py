@@ -54,8 +54,10 @@ class TwoLayerNet(object):
         # weights and biases using the keys 'W2' and 'b2'.                         #
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-        pass
+        self.params["W1"] = np.random.normal(0, weight_scale, (input_dim, hidden_dim))
+        self.params["b1"] = np.zeros(hidden_dim)
+        self.params["W2"] = np.random.normal(0, weight_scale, (hidden_dim, num_classes))
+        self.params["b2"] = np.zeros(num_classes)
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
@@ -88,7 +90,10 @@ class TwoLayerNet(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        affine1_out, affine1_cache = affine_forward(X, self.params["W1"], self.params["b1"])
+        relu_out, relu_cache = relu_forward(affine1_out)
+        affine2_out, affine2_cache = affine_forward(relu_out, self.params["W2"], self.params["b2"])
+        scores = affine2_out
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
