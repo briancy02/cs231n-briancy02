@@ -116,8 +116,19 @@ class TwoLayerNet(object):
         # of 0.5 to simplify the expression for the gradient.                      #
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+        loss, dout = softmax_loss(affine2_out, y)
+        dout_affine2, grads["W2"], grads["b2"] = affine_backward(dout, affine2_cache)
+        dout_relu = relu_backward(dout_affine2, relu_cache)
+        dout_affine1, grads["W1"], grads["b1"] = affine_backward(dout_relu, affine1_cache)
 
-        pass
+        loss += self.reg * 0.5 * ((self.params["W2"]**2).sum() + (self.params["W1"]**2).sum())
+        grads["W2"] += self.params["W2"] * self.reg
+        grads["W1"] += self.params["W1"] * self.reg
+
+        # loss regularization should factor in squared some of all weights in the process
+
+        # Bias gradient should not be regularized 
+        # https://stats.stackexchange.com/questions/153605/no-regularisation-term-for-bias-unit-in-neural-network
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
