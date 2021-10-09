@@ -73,8 +73,14 @@ class FullyConnectedNet(object):
         # parameters should be initialized to zeros.                               #
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+        last_dim = input_dim
+        for i, dim in enumerate(hidden_dims):
+          self.params["W" + str(i)] = np.random.normal(0, weight_scale, (last_dim, dim))
+          self.params["b" + str(i)] = np.zeros(dim)
+          last_dim = dim
+        self.params["W" + str(self.num_layers-1)] = np.random.normal(0, weight_scale, (last_dim, num_classes))
+        self.params["b" + str(self.num_layers-1)] = np.zeros(num_classes)  
 
-        pass
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
@@ -148,7 +154,17 @@ class FullyConnectedNet(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        out = {}
+        cache = {}
+        current_X = X
+
+        for i in range(self.num_layers):
+          out["affine" + str(i)], cache["affine" + str(i)] = affine_forward(current_X, self.params["W" + str(i)], self.params["b" + str(i)])
+          out["relu" + str(i)], cache["relu" + str(i)] = relu_forward(out["affine" + str(i)])
+          current_X = out["relu" + str(i)]
+        scores = current_X  
+
+        
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
@@ -174,12 +190,17 @@ class FullyConnectedNet(object):
         # of 0.5 to simplify the expression for the gradient.                      #
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-        pass
+        loss, dout = softmax_loss(current_X, y)
+        cur_d = dout
+        for i in range(self.num_layers - 1, -1, -1):
+          cur_d = relu_backward(cur_d, cache["relu" + str(i)])
+          cur_d, grads["W" + str(i)], grads["b" + str(i)] = affine_backward(cur_d, cache["affine" + str(i)])
+          
+        # 1. Did not know how reverse for loops are indexed, did not save value for scores, 
+        # didnt go backward from relu and instead started with affine  
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
-
         return loss, grads
