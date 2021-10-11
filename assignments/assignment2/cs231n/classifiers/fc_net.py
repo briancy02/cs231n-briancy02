@@ -158,11 +158,13 @@ class FullyConnectedNet(object):
         cache = {}
         current_X = X
 
-        for i in range(self.num_layers):
+        for i in range(self.num_layers-1):
           out["affine" + str(i)], cache["affine" + str(i)] = affine_forward(current_X, self.params["W" + str(i)], self.params["b" + str(i)])
           out["relu" + str(i)], cache["relu" + str(i)] = relu_forward(out["affine" + str(i)])
           current_X = out["relu" + str(i)]
-        scores = current_X  
+        out["affine" + str(self.num_layers-1)], cache["affine" + str(self.num_layers-1)] = affine_forward(current_X, self.params["W" + str(self.num_layers-1)], self.params["b" + str(self.num_layers-1)])  
+        scores = out["affine" + str(self.num_layers-1)]
+        to_print = cache["affine" + str(self.num_layers-1)]
 
         
 
@@ -190,14 +192,19 @@ class FullyConnectedNet(object):
         # of 0.5 to simplify the expression for the gradient.                      #
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-        loss, dout = softmax_loss(current_X, y)
+        loss, dout = softmax_loss(scores, y)
         cur_d = dout
-        for i in range(self.num_layers - 1, -1, -1):
+        cur_d, grads["W" + str(self.num_layers-1)], grads["b" + str(self.num_layers-1)] = affine_backward(cur_d, cache["affine" + str(self.num_layers-1)])
+        for i in range(self.num_layers - 2, -1, -1):
           cur_d = relu_backward(cur_d, cache["relu" + str(i)])
           cur_d, grads["W" + str(i)], grads["b" + str(i)] = affine_backward(cur_d, cache["affine" + str(i)])
           
         # 1. Did not know how reverse for loops are indexed, did not save value for scores, 
         # didnt go backward from relu and instead started with affine  
+        for key in grads.keys():
+          if key[0] == 'W':
+            grads[key] += self.params[key] * self.reg
+            loss += self.reg * 0.5 * (self.params[key]**2).sum()
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
