@@ -161,7 +161,11 @@ class FullyConnectedNet(object):
         for i in range(self.num_layers-1):
           out["affine" + str(i)], cache["affine" + str(i)] = affine_forward(current_X, self.params["W" + str(i)], self.params["b" + str(i)])
           out["relu" + str(i)], cache["relu" + str(i)] = relu_forward(out["affine" + str(i)])
-          current_X = out["relu" + str(i)]
+          if self.use_dropout:
+            out["dropout" + str(i)], cache["dropout" + str(i)] = dropout_forward(out["relu" + str(i)], self.dropout_param)
+            current_X = out["dropout" + str(i)]
+          else:
+            current_X = out["relu" + str(i)]
         out["affine" + str(self.num_layers-1)], cache["affine" + str(self.num_layers-1)] = affine_forward(current_X, self.params["W" + str(self.num_layers-1)], self.params["b" + str(self.num_layers-1)])  
         scores = out["affine" + str(self.num_layers-1)]
         to_print = cache["affine" + str(self.num_layers-1)]
@@ -196,6 +200,8 @@ class FullyConnectedNet(object):
         cur_d = dout
         cur_d, grads["W" + str(self.num_layers-1)], grads["b" + str(self.num_layers-1)] = affine_backward(cur_d, cache["affine" + str(self.num_layers-1)])
         for i in range(self.num_layers - 2, -1, -1):
+          if self.use_dropout:
+            cur_d = dropout_backward(cur_d, cache["dropout" + str(i)])
           cur_d = relu_backward(cur_d, cache["relu" + str(i)])
           cur_d, grads["W" + str(i)], grads["b" + str(i)] = affine_backward(cur_d, cache["affine" + str(i)])
           
