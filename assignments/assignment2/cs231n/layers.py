@@ -498,7 +498,14 @@ def dropout_forward(x, dropout_param):
         #######################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        mask = (np.random.rand(*x.shape) < dropout_param["p"]) / dropout_param["p"]
+        out = mask * x
+        x_copy = x.copy()
+        x_copy *= mask
+
+        # Found issue with doing x *= mask. I was doing in place multiplication on x reference when I should
+        # have copied the data and do in place multiplication
+
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         #######################################################################
@@ -510,7 +517,7 @@ def dropout_forward(x, dropout_param):
         #######################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        out = x
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         #######################################################################
@@ -518,6 +525,8 @@ def dropout_forward(x, dropout_param):
         #######################################################################
 
     cache = (dropout_param, mask)
+
+    
     out = out.astype(x.dtype, copy=False)
 
     return out, cache
@@ -539,8 +548,8 @@ def dropout_backward(dout, cache):
         # TODO: Implement training phase backward pass for inverted dropout   #
         #######################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-        pass
+        dx = dout * mask
+        # dout/dx is effectively the mask because out = x / p where mask value is not 0
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         #######################################################################
