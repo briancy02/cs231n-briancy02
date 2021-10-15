@@ -39,7 +39,7 @@ def sgd(w, dw, config=None):
     """
     if config is None:
         config = {}
-    config.setdefault("learning_rate", 1e-2)
+    print("IN SGD")    
 
     w -= config["learning_rate"] * dw
     return w, config
@@ -154,6 +154,10 @@ def adam(w, dw, config=None):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
+    print("IN ADAM")
+
+    
+    config["t"] += 1
     # t is your iteration counter going from 1 to infinity
     config["m"] = config["beta1"]*config["m"] + (1-config["beta1"])*dw
     mt = config["m"] / (1-config["beta1"]**config["t"])

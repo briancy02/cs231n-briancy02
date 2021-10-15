@@ -116,6 +116,7 @@ class Solver(object):
           epoch.
         """
         self.model = model
+        print("INITIAL PARAMS", model.params)
         self.X_train = data["X_train"]
         self.y_train = data["y_train"]
         self.X_val = data["X_val"]
@@ -165,6 +166,7 @@ class Solver(object):
         for p in self.model.params:
             d = {k: v for k, v in self.optim_config.items()}
             self.optim_configs[p] = d
+        print("RESET", self.model.params)    
 
     def _step(self):
         """
@@ -184,10 +186,14 @@ class Solver(object):
         # Perform a parameter update
         for p, w in self.model.params.items():
             dw = grads[p]
+            print("DW", dw)
             config = self.optim_configs[p]
+            print(self.update_rule)
             next_w, next_config = self.update_rule(w, dw, config)
+            print("next_w", next_w)
             self.model.params[p] = next_w
             self.optim_configs[p] = next_config
+        print("AFTER step", self.model.params)    
 
     def _save_checkpoint(self):
         if self.checkpoint_name is None:
@@ -245,10 +251,10 @@ class Solver(object):
             start = i * batch_size
             end = (i + 1) * batch_size
             scores = self.model.loss(X[start:end])
+            
             y_pred.append(np.argmax(scores, axis=1))
         y_pred = np.hstack(y_pred)
         acc = np.mean(y_pred == y)
-
         return acc
 
     def train(self):
@@ -304,6 +310,5 @@ class Solver(object):
                     self.best_params = {}
                     for k, v in self.model.params.items():
                         self.best_params[k] = v.copy()
-
         # At the end of training swap the best params into the model
         self.model.params = self.best_params
