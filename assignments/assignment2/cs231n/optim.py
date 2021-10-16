@@ -153,17 +153,19 @@ def adam(w, dw, config=None):
     # using it in any calculations.                                           #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    print("IN ADAM")
-
     
-    config["t"] += 1
-    # t is your iteration counter going from 1 to infinity
-    config["m"] = config["beta1"]*config["m"] + (1-config["beta1"])*dw
-    mt = config["m"] / (1-config["beta1"]**config["t"])
-    config["v"] = config["beta2"]*config["v"] + (1-config["beta2"])*(dw**2)
-    vt = config["v"] / (1-config["beta2"]**config["t"])
-    next_w = w - config["learning_rate"] * mt / (np.sqrt(vt) + config["epsilon"])
+    # Issue with updating config values while making calculations
+    eps, learning_rate = config['epsilon'], config['learning_rate']
+    beta1, beta2 = config['beta1'], config['beta2']    
+    m, v, t = config['m'], config['v'], config['t']
+    t += 1
+    m = beta1 * m + (1 - beta1) * dw
+    v = beta2 * v + (1 - beta2) * (dw * dw)
+    mt = m / (1 - beta1**t)
+    vt = v / (1 - beta2**t)
+    next_w = w - learning_rate * mt / (np.sqrt(vt) + eps)
+    config['m'], config['v'], config['t'] = m, v, t  
+    print(next_w)
 
     pass
 

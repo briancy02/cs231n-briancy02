@@ -160,25 +160,18 @@ class FullyConnectedNet(object):
         
 
         # Facing issues because model has single hidden layer?
-        print("In functiojn")
         for i in range(self.num_layers-1):
-          print("##########################")
-          print(self.params["W" + str(i)])
-          print(self.params)
           out["affine" + str(i)], cache["affine" + str(i)] = affine_forward(current_X, self.params["W" + str(i)], self.params["b" + str(i)])
-          print(out["affine" + str(i)])
           out["relu" + str(i)], cache["relu" + str(i)] = relu_forward(out["affine" + str(i)])
-          print("relu", out["relu" + str(i)])
           if self.use_dropout:
             out["dropout" + str(i)], cache["dropout" + str(i)] = dropout_forward(out["relu" + str(i)], self.dropout_param)
             current_X = out["dropout" + str(i)]
-            print("dropout", current_X)
           else:
+            ## Need to fix output when dropout = 1
             current_X = out["relu" + str(i)]
-          print(i, current_X)
         out["affine" + str(self.num_layers-1)], cache["affine" + str(self.num_layers-1)] = affine_forward(current_X, self.params["W" + str(self.num_layers-1)], self.params["b" + str(self.num_layers-1)])  
         scores = out["affine" + str(self.num_layers-1)]
-        to_print = cache["affine" + str(self.num_layers-1)]
+        print(scores)
 
         
 

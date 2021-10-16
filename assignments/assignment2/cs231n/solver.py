@@ -186,14 +186,10 @@ class Solver(object):
         # Perform a parameter update
         for p, w in self.model.params.items():
             dw = grads[p]
-            print("DW", dw)
             config = self.optim_configs[p]
-            print(self.update_rule)
             next_w, next_config = self.update_rule(w, dw, config)
-            print("next_w", next_w)
             self.model.params[p] = next_w
             self.optim_configs[p] = next_config
-        print("AFTER step", self.model.params)    
 
     def _save_checkpoint(self):
         if self.checkpoint_name is None:
