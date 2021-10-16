@@ -172,9 +172,6 @@ class FullyConnectedNet(object):
             current_X = out["relu" + str(i)]
         out["affine" + str(self.num_layers-1)], cache["affine" + str(self.num_layers-1)] = affine_forward(current_X, self.params["W" + str(self.num_layers-1)], self.params["b" + str(self.num_layers-1)])  
         scores = out["affine" + str(self.num_layers-1)]
-        print(scores)
-        if np.isnan(scores).sum() > 0:
-          sys.exit()
 
         
 
@@ -204,14 +201,11 @@ class FullyConnectedNet(object):
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         loss, dout = softmax_loss(scores, y)
         cur_d = dout
-        print(dout)
         cur_d, grads["W" + str(self.num_layers-1)], grads["b" + str(self.num_layers-1)] = affine_backward(cur_d, cache["affine" + str(self.num_layers-1)])
         for i in range(self.num_layers - 2, -1, -1):
           if self.use_dropout:
             cur_d = dropout_backward(cur_d, cache["dropout" + str(i)])
-          print("before d", cur_d)  
           cur_d = relu_backward(cur_d, cache["relu" + str(i)])
-          print("cur d", cur_d)
           cur_d, grads["W" + str(i)], grads["b" + str(i)] = affine_backward(cur_d, cache["affine" + str(i)])
           
         # 1. Did not know how reverse for loops are indexed, did not save value for scores, 

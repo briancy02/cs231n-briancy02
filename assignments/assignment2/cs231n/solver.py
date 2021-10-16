@@ -116,7 +116,6 @@ class Solver(object):
           epoch.
         """
         self.model = model
-        print("INITIAL PARAMS", model.params)
         self.X_train = data["X_train"]
         self.y_train = data["y_train"]
         self.X_val = data["X_val"]

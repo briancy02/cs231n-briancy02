@@ -165,7 +165,6 @@ def adam(w, dw, config=None):
     vt = v / (1 - beta2**t)
     next_w = w - learning_rate * mt / (np.sqrt(vt) + eps)
     config['m'], config['v'], config['t'] = m, v, t  
-    print("next grad", next_w)
 
     pass
 
