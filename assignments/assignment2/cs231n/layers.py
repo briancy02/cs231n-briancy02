@@ -198,8 +198,7 @@ def softmax_loss(x, y):
     correct_scores = x[np.arange(y.shape[0]), y]
     loss = -1 * correct_scores + np.log(np.exp(x).sum(axis=1))
     loss = loss.sum() / y.shape[0]
-    #x -= np.max(x, axis=1).reshape((y.shape[0], 1))
-    # You get rid of this because x is initialized as very small floating point numbers
+    x -= np.max(x, axis=1).reshape((y.shape[0], 1))
     dx = np.exp(x) / np.sum(np.exp(x), axis=1).reshape((y.shape[0],1))
     dx[np.arange(y.shape[0]), y] -= 1
     dx /= y.shape[0]
