@@ -282,13 +282,14 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         #######################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         cache = {}
+        cache["x"], cache["gamma"], cache["beta"], cache["eps"] = x, gamma, beta, eps
 
         cache["mean"] = np.mean(x, axis=0)
-        cache["var"] = np.mean((x - np.expand_dims(cache["mean"], axis=0))**2, axis=0)
+        cache["var"] = np.mean((x - cache["mean"])**2, axis=0)
         running_mean = running_mean * momentum + (1-momentum) * cache["mean"]
         running_var = running_var * momentum + (1-momentum) * cache["var"]
-        cache["x_norm"] = (x - np.expand_dims(cache["mean"], axis=0)) / np.sqrt(np.expand_dims(cache["var"], axis=0) + eps)
-        out = gamma * cache["x_norm"] + beta
+        cache["x_norm"] = (x - cache["mean"]) / np.sqrt(cache["var"] + eps)
+        out = cache["x_norm"] * gamma + beta
         
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         #######################################################################
@@ -343,9 +344,15 @@ def batchnorm_backward(dout, cache):
     # might prove to be helpful.                                              #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+    eps = cache["eps"]
 
-    pass
-
+    dnorm = dout * cache["gamma"]
+    # did **3/2 instead of 1.5...
+    dvar = (-0.5*(cache["var"] + eps)**-1.5) * (dnorm * (cache["x"] - cache["mean"])).sum(axis=0)
+    dmean = (dnorm * -1/np.sqrt(cache["var"] + eps)).sum(axis=0) - 2  * dvar * (cache["x"] - cache["mean"]).mean(axis=0)
+    dx = dnorm * 1/np.sqrt(cache["var"] + eps) + 2/cache["x"].shape[0] * dvar * (cache["x"] - cache["mean"]) + dmean/cache["x"].shape[0]
+    dgamma = (dout * cache["x_norm"]).sum(axis=0)
+    dbeta = dout.sum(axis=0)
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
     #                             END OF YOUR CODE                            #
