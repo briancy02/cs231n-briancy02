@@ -197,6 +197,8 @@ def softmax_loss(x, y):
     correct_scores = x[np.arange(y.shape[0]), y]
     loss = -1 * correct_scores + np.log(np.exp(x).sum(axis=1))
     loss = loss.sum() / y.shape[0]
+    # CANNOT DO X =- max because the inplace operation updates
+    x -= np.max(x, axis=1).reshape((y.shape[0], 1))
     adjusted = x - np.max(x, axis=1).reshape((y.shape[0], 1))
     dx = np.exp(adjusted) / np.sum(np.exp(adjusted), axis=1).reshape((y.shape[0],1))
     dx[np.arange(y.shape[0]), y] -= 1
