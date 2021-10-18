@@ -285,10 +285,12 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         cache["x"], cache["gamma"], cache["beta"], cache["eps"] = x, gamma, beta, eps
 
         cache["mean"] = np.mean(x, axis=0)
-        cache["var"] = np.mean((x - cache["mean"])**2, axis=0)
+        cache["x_cent"] = x - cache["mean"]
+        cache["var"] = np.mean(cache["x_cent"]**2, axis=0)
         running_mean = running_mean * momentum + (1-momentum) * cache["mean"]
         running_var = running_var * momentum + (1-momentum) * cache["var"]
-        cache["x_norm"] = (x - cache["mean"]) / np.sqrt(cache["var"] + eps)
+        cache["invsv"] = 1/np.sqrt(cache["var"] + eps)
+        cache["x_norm"] = (x - cache["mean"]) * cache["invsv"]
         out = cache["x_norm"] * gamma + beta
         
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -384,9 +386,12 @@ def batchnorm_backward_alt(dout, cache):
     # single statement; our implementation fits on a single 80-character line.#
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    pass
-
+    dnorm = dout * cache["gamma"]
+    dcentered = dnorm * cache["invsv"]
+    # KEPT FAILING BC THE MEAN WASN'T DONE THROUGH AXIS=0
+    dx = dcentered + (dcentered * (-cache["x_norm"]**2 - 1)).mean(axis=0)
+    dgamma = (dout * cache["x_norm"]).sum(axis=0)
+    dbeta = dout.sum(axis=0)
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
     #                             END OF YOUR CODE                            #
