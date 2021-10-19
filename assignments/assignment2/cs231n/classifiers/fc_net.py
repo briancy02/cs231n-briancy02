@@ -78,6 +78,9 @@ class FullyConnectedNet(object):
         for i, dim in enumerate(hidden_dims):
           self.params["W" + str(i)] = np.random.normal(0, weight_scale, (last_dim, dim))
           self.params["b" + str(i)] = np.zeros(dim)
+          if self.normalization == "batchnorm":
+            self.params["gamma" + str(i)] = np.ones(dim)
+            self.params["beta" + str(i)] = np.zeros(dim)
           last_dim = dim
         self.params["W" + str(self.num_layers-1)] = np.random.normal(0, weight_scale, (last_dim, num_classes))
         self.params["b" + str(self.num_layers-1)] = np.zeros(num_classes)  
@@ -160,15 +163,17 @@ class FullyConnectedNet(object):
         current_X = X
         
 
-        # Facing issues because model has single hidden layer?
         for i in range(self.num_layers-1):
           out["affine" + str(i)], cache["affine" + str(i)] = affine_forward(current_X, self.params["W" + str(i)], self.params["b" + str(i)])
-          out["relu" + str(i)], cache["relu" + str(i)] = relu_forward(out["affine" + str(i)])
+          if self.normalization == "batchnorm":
+            out["batchnorm" + str(i)], cache["batchnorm" + str(i)] = batchnorm_forward(out["affine" + str(i)], self.params["gamma" + str(i)], self.params["beta" + str(i)], self.bn_params[i])
+            out["relu" + str(i)], cache["relu" + str(i)] = relu_forward(out["batchnorm" + str(i)])  
+          else:
+            out["relu" + str(i)], cache["relu" + str(i)] = relu_forward(out["affine" + str(i)])
           if self.use_dropout:
             out["dropout" + str(i)], cache["dropout" + str(i)] = dropout_forward(out["relu" + str(i)], self.dropout_param)
             current_X = out["dropout" + str(i)]
           else:
-            ## Need to fix output when dropout = 1
             current_X = out["relu" + str(i)]
         out["affine" + str(self.num_layers-1)], cache["affine" + str(self.num_layers-1)] = affine_forward(current_X, self.params["W" + str(self.num_layers-1)], self.params["b" + str(self.num_layers-1)])  
         scores = out["affine" + str(self.num_layers-1)]
@@ -206,6 +211,8 @@ class FullyConnectedNet(object):
           if self.use_dropout:
             cur_d = dropout_backward(cur_d, cache["dropout" + str(i)])
           cur_d = relu_backward(cur_d, cache["relu" + str(i)])
+          if self.normalization == "batchnorm":
+            cur_d, grads["gamma" + str(i)], grads["beta" + str(i)] = batchnorm_backward_alt(cur_d, cache["batchnorm" + str(i)]) 
           cur_d, grads["W" + str(i)], grads["b" + str(i)] = affine_backward(cur_d, cache["affine" + str(i)])
           
         # 1. Did not know how reverse for loops are indexed, did not save value for scores, 
