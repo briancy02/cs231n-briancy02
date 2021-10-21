@@ -78,7 +78,7 @@ class FullyConnectedNet(object):
         for i, dim in enumerate(hidden_dims):
           self.params["W" + str(i)] = np.random.normal(0, weight_scale, (last_dim, dim))
           self.params["b" + str(i)] = np.zeros(dim)
-          if self.normalization == "batchnorm":
+          if self.normalization == "batchnorm" or self.normalization == "layernorm":
             self.params["gamma" + str(i)] = np.ones(dim)
             self.params["beta" + str(i)] = np.zeros(dim)
           last_dim = dim
@@ -168,6 +168,9 @@ class FullyConnectedNet(object):
           if self.normalization == "batchnorm":
             out["batchnorm" + str(i)], cache["batchnorm" + str(i)] = batchnorm_forward(out["affine" + str(i)], self.params["gamma" + str(i)], self.params["beta" + str(i)], self.bn_params[i])
             out["relu" + str(i)], cache["relu" + str(i)] = relu_forward(out["batchnorm" + str(i)])  
+          elif self.normalization == "layernorm": 
+            out["layernorm" + str(i)], cache["layernorm" + str(i)] = layernorm_forward(out["affine" + str(i)], self.params["gamma" + str(i)], self.params["beta" + str(i)], self.ln_params[i])
+            out["relu" + str(i)], cache["relu" + str(i)] = relu_forward(out["layernorm" + str(i)])  
           else:
             out["relu" + str(i)], cache["relu" + str(i)] = relu_forward(out["affine" + str(i)])
           if self.use_dropout:
@@ -213,6 +216,8 @@ class FullyConnectedNet(object):
           cur_d = relu_backward(cur_d, cache["relu" + str(i)])
           if self.normalization == "batchnorm":
             cur_d, grads["gamma" + str(i)], grads["beta" + str(i)] = batchnorm_backward_alt(cur_d, cache["batchnorm" + str(i)]) 
+          elif self.normalization == "layernorm":
+            cur_d, grads["gamma" + str(i)], grads["beta" + str(i)] = layernorm_backward(cur_d, cache["layernorm" + str(i)]) 
           cur_d, grads["W" + str(i)], grads["b" + str(i)] = affine_backward(cur_d, cache["affine" + str(i)])
           
         # 1. Did not know how reverse for loops are indexed, did not save value for scores, 

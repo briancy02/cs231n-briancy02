@@ -435,14 +435,18 @@ def layernorm_forward(x, gamma, beta, ln_param):
     # transformations you could perform, that would enable you to copy over   #
     # the batch norm code and leave it almost unchanged?                      #
     ###########################################################################
-    # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    pass
-
-    # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-    ###########################################################################
-    #                             END OF YOUR CODE                            #
-    ###########################################################################
+    out, cache = None, None
+    cache = {}
+    cache["x"], cache["gamma"], cache["beta"], cache["eps"] = x.T, gamma[np.newaxis].T, beta[np.newaxis].T, eps
+    cache["x_t"] = cache["x"].T
+    cache["mean"] = np.mean(cache["x_t"], axis=0)
+    cache["x_cent"] = cache["x_t"] - cache["mean"]
+    cache["var"] = np.mean(cache["x_cent"]**2, axis=0)
+    cache["invsv"] = 1/np.sqrt(cache["var"] + eps)
+    cache["x_norm"] = (cache["x_t"] - cache["mean"]) * cache["invsv"]
+    print(cache["x_norm"])
+    out = cache["x_norm"].T * cache["gamma"] + cache["beta"]
+    
     return out, cache
 
 
@@ -470,14 +474,24 @@ def layernorm_backward(dout, cache):
     # still apply!                                                            #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+    eps = cache["eps"]
 
-    pass
+    dnorm = dout * cache["gamma"]
+    # did **3/2 instead of 1.5...
+    dvar = (-0.5*(cache["var"] + eps)**-1.5) * (dnorm * (cache["x_t"] - cache["mean"])).sum(axis=0)
+    dmean = (dnorm * -1/np.sqrt(cache["var"] + eps)).sum(axis=0) - 2  * dvar * (cache["x_t"] - cache["mean"]).mean(axis=0)
+    dx = dnorm * 1/np.sqrt(cache["var"] + eps) + 2/cache["x_t"].shape[0] * dvar * (cache["x_t"] - cache["mean"]) + dmean/cache["x_t"].shape[0]
+    dgamma = (dout * cache["x_norm"]).sum(axis=0)
+    dbeta = dout.sum(axis=0)
+    dxT = dx.T
+    print("dx", dx)
+    print("dxT",dxT)
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
-    return dx, dgamma, dbeta
+    return dxT, dgamma, dbeta
 
 
 def dropout_forward(x, dropout_param):
