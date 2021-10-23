@@ -481,15 +481,12 @@ def layernorm_backward(dout, cache):
     dx = dnorm * 1/np.sqrt(cache["var"] + eps) + 2/cache["x_t"].shape[0] * dvar * (cache["x_t"] - cache["mean"]) + dmean/cache["x_t"].shape[0]
     dgamma = (dout * cache["x_norm"]).sum(axis=0)
     dbeta = dout.sum(axis=0)
-    dxT = dx.T
-    print("dx", dx)
-    print("dxT",dxT)
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
-    return dxT, dgamma, dbeta
+    return dx, dgamma, dbeta
 
 
 def dropout_forward(x, dropout_param):

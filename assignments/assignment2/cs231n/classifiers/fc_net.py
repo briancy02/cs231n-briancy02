@@ -109,7 +109,7 @@ class FullyConnectedNet(object):
         if self.normalization == "batchnorm":
             self.bn_params = [{"mode": "train"} for i in range(self.num_layers - 1)]
         if self.normalization == "layernorm":
-            self.bn_params = [{} for i in range(self.num_layers - 1)]
+            self.ln_params = [{} for i in range(self.num_layers - 1)]
 
         # Cast all parameters to the correct datatype.
         for k, v in self.params.items():
