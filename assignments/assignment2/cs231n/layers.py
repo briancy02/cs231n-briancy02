@@ -389,9 +389,8 @@ def batchnorm_backward_alt(dout, cache):
     dnorm = dout * cache["gamma"]
     dcentered = dnorm * cache["invsv"]
     # KEPT FAILING BC THE MEAN WASN'T DONE THROUGH AXIS=0
-    #dx = dcentered + (dcentered * (-cache["x_norm"]**2 - 1)).mean(axis=0)
     # did **3/2 instead of 1.5...
-    dx = -(dcentered * cache["x_norm"]).mean(axis=0) * cache["x_norm"] - dcentered.mean(axis=0) + dcentered * ((cache["x_norm"]).mean(axis=0)**2 + 1)
+    dx = cache["invsv"]*(dnorm - dnorm.mean(axis=0) - (cache["x_norm"]*dnorm).mean(axis=0) * cache["x_norm"])
     dgamma = (dout * cache["x_norm"]).sum(axis=0)
     dbeta = dout.sum(axis=0)
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
