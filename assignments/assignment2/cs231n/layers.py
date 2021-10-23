@@ -436,15 +436,14 @@ def layernorm_forward(x, gamma, beta, ln_param):
     ###########################################################################
     out, cache = None, None
     cache = {}
-    cache["x"], cache["gamma"], cache["beta"], cache["eps"] = x.T, gamma[np.newaxis].T, beta[np.newaxis].T, eps
+    cache["x"], cache["gamma"], cache["beta"], cache["eps"] = x.T, gamma[np.newaxis], beta[np.newaxis], eps
     cache["x_t"] = cache["x"].T
     cache["mean"] = np.mean(cache["x_t"], axis=0)
     cache["x_cent"] = cache["x_t"] - cache["mean"]
     cache["var"] = np.mean(cache["x_cent"]**2, axis=0)
     cache["invsv"] = 1/np.sqrt(cache["var"] + eps)
     cache["x_norm"] = (cache["x_t"] - cache["mean"]) * cache["invsv"]
-    print(cache["x_norm"])
-    out = cache["x_norm"].T * cache["gamma"] + cache["beta"]
+    out = cache["x_norm"] * cache["gamma"] + cache["beta"]
     
     return out, cache
 
