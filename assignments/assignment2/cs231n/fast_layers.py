@@ -79,7 +79,6 @@ def conv_forward_strides(x, w, b, conv_param):
     # The old version of conv_forward_fast doesn't do this, so for a fair
     # comparison we won't either
     out = np.ascontiguousarray(out)
-
     cache = (x, w, b, conv_param, x_cols)
     return out, cache
 
