@@ -418,12 +418,13 @@ def lstm_forward(x, h0, Wx, Wh, b):
     # You should use the lstm_step_forward function that you just defined.      #
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-    prev_h = h0
+    cache = {}
     h = np.zeros((x.shape[0], x.shape[1], h0.shape[1]))
     prev_c = np.zeros_like(h0)
-    h[:,0,:], prev_c, cache = lstm_step_forward(x[:,0,:], prev_h, prev_c, Wx, Wh, b)
+    h[:,0,:], prev_c, cache[0] = lstm_step_forward(x[:,0,:], h0, prev_c, Wx, Wh, b)
     for i in range(1, x.shape[1]):
-      h[:,i,:], prev_c, cache = lstm_step_forward(x[:,i,:], h[:,i-1,:], prev_c, Wx, Wh, b)
+      h[:,i,:], prev_c, cache[i] = lstm_step_forward(x[:,i,:], h[:,i-1,:], prev_c, Wx, Wh, b)
+    cache["c"] = prev_c  
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ##############################################################################
@@ -453,13 +454,19 @@ def lstm_backward(dh, cache):
     # You should use the lstm_step_backward function that you just defined.     #
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    prev_h = h0
-    h = np.zeros((x.shape[0], x.shape[1], h0.shape[1]))
-    prev_c = np.zeros_like(h0)
-    h[:,0,:], prev_c, cache = lstm_step_forward(x[:,0,:], prev_h, prev_c, Wx, Wh, b)
-    for i in range(1, x.shape[1]):
-      h[:,i,:], prev_c, cache = lstm_step_forward(x[:,i,:], h[:,i-1,:], prev_c, Wx, Wh, b)
+    
+    dx, dWx, dprev_h, dWh, _, _, _, _, _, dprev_c, _, _ = cache[0]
+    dx = np.zeros((dx.shape[0], dh.shape[1], dx.shape[1]))
+    db = np.zeros((dx.shape[1],dWx.shape[1]))
+    dWx = np.zeros((dx.shape[1], dWx.shape[0], dWx.shape[1]))
+    dWh = np.zeros((dx.shape[1], dWh.shape[0], dWh.shape[1]))
+    dx[:,dx.shape[1] - 1,:], dprev_h, dprev_c, dWx[dx.shape[1] - 1], dWh[dx.shape[1] - 1], db[dx.shape[1] - 1] = lstm_step_backward(dh[:,dx.shape[1] - 1,:], 0, cache[dx.shape[1] - 1])
+    for i in range(dx.shape[1] - 2, -1, -1):
+      dx[:,i,:], dprev_h, dprev_c, dWx[i], dWh[i], db[i] = lstm_step_backward(dprev_h + dh[:,i,:], dprev_c, cache[i])
+    dWh = dWh.sum(axis=0)
+    dWx = dWx.sum(axis=0)
+    db = db.sum(axis=0)
+    dh0 = dprev_h
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ##############################################################################
