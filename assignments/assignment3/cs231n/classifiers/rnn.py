@@ -150,12 +150,18 @@ class CaptioningRNN:
         cache = {}
         h0, cache["affine"] = affine_forward(features, self.params["W_proj"], self.params["b_proj"])
         x, cache["word_emb"] = word_embedding_forward(captions_in, self.params["W_embed"])
-        h, cache["rnn"] = rnn_forward(x, h0, self.params["Wx"], self.params["Wh"], self.params["b"])
-        scores, cache["scores"] = temporal_affine_forward(h, self.params["W_vocab"], self.params["b_vocab"])
+        if self.cell_type == 'rnn':
+          h, cache["rnn"] = rnn_forward(x, h0, self.params["Wx"], self.params["Wh"], self.params["b"])
+        elif self.cell_type == 'lstm':
+          h, cache["lstm"] = lstm_forward(x, h0, self.params["Wx"], self.params["Wh"], self.params["b"])
+        scores, cache["scores"] = temporal_affine_forward(h, self.params["W_vocab"], self.params["b_vocab"])  
         loss, dout = temporal_softmax_loss(scores, captions_out, mask)
 
         dh, grads["W_vocab"], grads["b_vocab"]= temporal_affine_backward(dout, cache["scores"])
-        dx, dh0, grads["Wx"], grads["Wh"], grads["b"] = rnn_backward(dh, cache["rnn"])
+        if self.cell_type == 'rnn':
+          dx, dh0, grads["Wx"], grads["Wh"], grads["b"] = rnn_backward(dh, cache["rnn"])
+        elif self.cell_type == 'lstm':
+          dx, dh0, grads["Wx"], grads["Wh"], grads["b"] = lstm_backward(dh, cache["lstm"])
         grads["W_embed"] = word_embedding_backward(dx, cache["word_emb"])
         dfeatures, grads["W_proj"], grads["b_proj"] = affine_backward(dh0, cache["affine"])
         
