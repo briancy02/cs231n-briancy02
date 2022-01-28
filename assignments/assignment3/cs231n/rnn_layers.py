@@ -461,7 +461,7 @@ def lstm_backward(dh, cache):
     dWx = np.zeros((dx.shape[1], dWx.shape[0], dWx.shape[1]))
     dWh = np.zeros((dx.shape[1], dWh.shape[0], dWh.shape[1]))
     dx[:,dx.shape[1] - 1,:], dprev_h, dprev_c, dWx[dx.shape[1] - 1], dWh[dx.shape[1] - 1], db[dx.shape[1] - 1] = lstm_step_backward(dh[:,dx.shape[1] - 1,:], 0, cache[dx.shape[1] - 1])
-    for i in range(dx.shape[1] - 2, -1, -1):
+    for i in range(dx.shape[1] - 2, -1, -1): 
       dx[:,i,:], dprev_h, dprev_c, dWx[i], dWh[i], db[i] = lstm_step_backward(dprev_h + dh[:,i,:], dprev_c, cache[i])
     dWh = dWh.sum(axis=0)
     dWx = dWx.sum(axis=0)

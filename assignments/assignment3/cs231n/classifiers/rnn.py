@@ -232,8 +232,16 @@ class CaptioningRNN:
         ###########################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
-
+        cache = {}
+        prev_h, cache["affine"] = affine_forward(features, self.params["W_proj"], self.params["b_proj"])
+        prev_h, cache = rnn_step_forward(W_embed[self._start], prev_h, Wx, Wh, b)
+        captions[:,0] = self._start
+        for i in range(1,captions.shape[1]):
+          scores = prev_h.dot(W_vocab).reshape(prev_h.shape[0], b_vocab.shape[0]) + b_vocab
+          captions[:,i] = scores.argmax(axis=1)
+          prev_h, cache = rnn_step_forward(W_embed[scores.argmax(axis=1)], prev_h, Wx, Wh, b)
+          
+        
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
         #                             END OF YOUR CODE                             #
